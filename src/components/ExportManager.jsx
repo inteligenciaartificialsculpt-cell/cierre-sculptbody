@@ -39,7 +39,7 @@ const ExportManager = () => {
 
     const cargarReportes = async () => {
         setLoading(true)
-        const { data } = await getReportes(getLastDayDate(mesSeleccionado))
+        const { data } = await getReportes(mesSeleccionado)
         if (data) {
             // Añadir información de sucursal a cada reporte
             const reportesConSucursal = data.map(reporte => ({

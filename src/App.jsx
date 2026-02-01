@@ -4,6 +4,7 @@ import Dashboard from './components/Dashboard'
 import BulkUpload from './components/BulkUpload'
 import ReportesManager from './components/ReportesManager'
 import ExportManager from './components/ExportManager'
+import SyncData from './components/SyncData'
 import './index.css'
 
 function App() {
@@ -33,6 +34,9 @@ function App() {
 
             case 'exportar':
                 return <ExportManager />
+
+            case 'sync':
+                return <SyncData />
 
             default:
                 return <Dashboard />

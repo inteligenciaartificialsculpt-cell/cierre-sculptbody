@@ -31,6 +31,12 @@ const Sidebar = ({ activeView, setActiveView }) => {
             label: 'Exportar TXT',
             icon: '💾',
             description: 'Generar Archivos'
+        },
+        {
+            id: 'sync',
+            label: 'Sincronizar Cloud',
+            icon: '☁️',
+            description: 'Subir Datos Locales'
         }
     ]
 
