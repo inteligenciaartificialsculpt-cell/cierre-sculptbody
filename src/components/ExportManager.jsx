@@ -163,7 +163,7 @@ const ExportManager = () => {
                     <div className="card-stat">
                         <div className="stat-label">Total Ventas</div>
                         <div className="stat-number text-green-400 text-3xl">
-                            ${reportes.reduce((sum, r) => sum + r.total_venta_bruta, 0).toLocaleString('es-CL')}
+                            ${Math.round(reportes.reduce((sum, r) => sum + r.total_venta_bruta, 0)).toLocaleString('es-CL')}
                         </div>
                     </div>
                 </div>
@@ -248,7 +248,7 @@ const ExportManager = () => {
                                         <td className="text-accent-red font-bold">
                                             {reporte.comision_porcentaje}%
                                             <span className="text-gray-400 text-xs block">
-                                                ${((reporte.total_venta_bruta * reporte.comision_porcentaje) / 100)?.toLocaleString('es-CL')}
+                                                ${Math.round((reporte.total_venta_bruta * reporte.comision_porcentaje) / 100)?.toLocaleString('es-CL')}
                                             </span>
                                         </td>
                                         <td className="text-purple-400">

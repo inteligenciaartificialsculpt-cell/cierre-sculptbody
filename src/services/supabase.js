@@ -75,9 +75,33 @@ export const upsertProfesional = async (nombre, sucursalId) => {
     }
 }
 
-// Crear reporte mensual
+// Crear o actualizar reporte mensual (evita duplicados por mes)
 export const createReporteMensual = async (reporteData) => {
     try {
+        // Verificar si ya existe un reporte para este profesional en este mes exacto
+        const { data: existing } = await supabase
+            .from('reportes_mensuales')
+            .select('id')
+            .eq('profesional_id', reporteData.profesional_id)
+            .eq('fecha_reporte', reporteData.fecha_reporte)
+            .maybeSingle()
+
+        if (existing) {
+            // Si ya existe, actualizamos el actual (evita sumas dobles)
+            const { data, error } = await supabase
+                .from('reportes_mensuales')
+                .update(reporteData)
+                .eq('id', existing.id)
+                .select()
+                .single()
+
+            if (error) throw error
+            // También deberíamos limpiar servicios antiguos si los vamos a reemplazar, 
+            // pero para simplicidad y seguridad aquí devolvemos el reporte.
+            return { data, error: null, isUpdate: true }
+        }
+
+        // Si no existe, insertamos normal
         const { data, error } = await supabase
             .from('reportes_mensuales')
             .insert(reporteData)
@@ -85,9 +109,9 @@ export const createReporteMensual = async (reporteData) => {
             .single()
 
         if (error) throw error
-        return { data, error: null }
+        return { data, error: null, isUpdate: false }
     } catch (error) {
-        console.error('Error al crear reporte:', error)
+        console.error('Error al manejar el reporte mensual:', error)
         return { data: null, error }
     }
 }

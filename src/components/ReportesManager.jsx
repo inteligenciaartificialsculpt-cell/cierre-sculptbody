@@ -253,7 +253,7 @@ const ReportesManager = ({ refreshTrigger }) => {
                             <div className="card bg-red-900/20 border-red-700">
                                 <div className="stat-label">Comisión ({reporteSeleccionado.comision_porcentaje}%)</div>
                                 <div className="stat-number text-accent-red text-3xl">
-                                    ${((reporteSeleccionado.total_venta_bruta * reporteSeleccionado.comision_porcentaje) / 100)?.toLocaleString('es-CL')}
+                                    ${Math.round((reporteSeleccionado.total_venta_bruta * reporteSeleccionado.comision_porcentaje) / 100)?.toLocaleString('es-CL')}
                                 </div>
                             </div>
                         </div>

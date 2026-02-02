@@ -59,9 +59,9 @@ const SyncData = () => {
                         .insert({
                             profesional_id: profData.id,
                             fecha_reporte: localR.fecha_reporte,
-                            total_venta_bruta: localR.total_venta_bruta,
+                            total_venta_bruta: Math.round(localR.total_venta_bruta),
                             comision_porcentaje: localR.comision_porcentaje,
-                            pago_neto: localR.pago_neto,
+                            pago_neto: Math.round(localR.pago_neto),
                             estado: 'procesado'
                         })
                         .select()
@@ -75,8 +75,8 @@ const SyncData = () => {
                             reporte_id: repoData.id,
                             nombre_servicio: s.nombre_servicio,
                             cantidad: s.cantidad,
-                            precio_unitario: s.precio_unitario || 0,
-                            subtotal: s.subtotal
+                            precio_unitario: Math.round(s.precio_unitario || 0),
+                            subtotal: Math.round(s.subtotal)
                         }))
 
                         const { error: servError } = await supabase

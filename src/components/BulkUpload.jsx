@@ -132,9 +132,9 @@ const BulkUpload = ({ onSuccess }) => {
                             id: Math.random().toString(36).substr(2, 9),
                             profesional_id: 'demo-prof-' + Math.random().toString(36).substr(2, 5),
                             fecha_reporte: result.data.fecha_reporte || getLastDayDate(mesSeleccionado),
-                            total_venta_bruta: result.data.total_venta,
+                            total_venta_bruta: Math.round(result.data.total_venta),
                             comision_porcentaje: sucursales.find(s => s.id === selectedSucursal).comision_porcentaje,
-                            pago_neto: result.data.total_venta * (1 - sucursales.find(s => s.id === selectedSucursal).comision_porcentaje / 100),
+                            pago_neto: Math.round(result.data.total_venta * (1 - sucursales.find(s => s.id === selectedSucursal).comision_porcentaje / 100)),
                             estado: 'demo',
                             profesional: {
                                 nombre: result.data.nombre_profesional,
@@ -202,8 +202,8 @@ const BulkUpload = ({ onSuccess }) => {
                         reporte_id: reporte.id,
                         nombre_servicio: servicio.nombre,
                         cantidad: servicio.cantidad,
-                        precio_unitario: servicio.precio_unitario,
-                        subtotal: servicio.subtotal
+                        precio_unitario: Math.round(servicio.precio_unitario),
+                        subtotal: Math.round(servicio.subtotal)
                     }))
 
                     await createServiciosReporte(serviciosData)
