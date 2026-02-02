@@ -292,16 +292,24 @@ const ReportesManager = ({ refreshTrigger }) => {
                         </div>
 
                         {/* Imagen */}
-                        {reporteSeleccionado.imagen_url && (
-                            <div className="card bg-dark-secondary mt-6">
-                                <h3 className="text-xl font-black text-white mb-4">Imagen Original</h3>
+                        <div className="card bg-dark-secondary mt-6">
+                            <h3 className="text-xl font-black text-white mb-4">Imagen Original</h3>
+                            {reporteSeleccionado.imagen_url ? (
                                 <img
                                     src={reporteSeleccionado.imagen_url}
                                     alt="Reporte Original"
-                                    className="w-full rounded-lg border border-gray-700"
+                                    className="w-full rounded-lg border border-gray-700 shadow-2xl"
                                 />
-                            </div>
-                        )}
+                            ) : (
+                                <div className="p-12 border-2 border-dashed border-gray-800 rounded-lg text-center">
+                                    <div className="text-5xl mb-4 opacity-20">🖼️</div>
+                                    <p className="text-gray-500 font-bold">Respaldo visual no disponible</p>
+                                    <p className="text-xs text-gray-600 mt-2">
+                                        Este reporte fue cargado localmente o sincronizado sin archivo de imagen.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}

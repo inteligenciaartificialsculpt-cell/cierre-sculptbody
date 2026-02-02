@@ -25,9 +25,15 @@ try {
 // PROMPT DE EXTRACCIÓN DE DATOS
 // =============================================
 const EXTRACTION_PROMPT = `
-Eres un asistente experto en análisis de reportes de ventas para centros estéticos.
+Eres un asistente experto en análisis de reportes de ventas para centros estéticos en CHILE.
 
-INSTRUCCIONES:
+INSTRUCCIONES DE MONEDA (CLP):
+1. Los montos están en PESOS CHILENOS (CLP).
+2. IMPORTANTE: El punto (.) en los reportes suele ser un SEPARADOR DE MILES (ej: 11.930.000 es 11 millones).
+3. NO trunques los números. Si ves "11.930.000", el valor numérico es 11930000.
+4. Si ves un número como "11.930" en un total general, es altamente probable que sea "11.930.000". Usa el sentido común según el tipo de servicio (un tratamiento suele costar entre 20.000 y 800.000 CLP).
+
+INSTRUCCIONES DE EXTRACCIÓN:
 1. Analiza la imagen del reporte de ventas adjunto.
 2. Extrae TODA la información en formato JSON estructurado.
 3. IMPORTANTE: Identifica TODOS los servicios/tratamientos con sus cantidades y precios.
@@ -41,20 +47,20 @@ FORMATO DE SALIDA REQUERIDO (JSON):
     {
       "nombre": "Nombre del servicio/tratamiento",
       "cantidad": número entero,
-      "precio_unitario": número decimal,
-      "subtotal": número decimal (cantidad * precio_unitario)
+      "precio_unitario": número entero (CLP),
+      "subtotal": número entero (CLP)
     }
   ],
-  "total_venta": número decimal (suma de todos los subtotales),
+  "total_venta": número entero (CLP - suma de todos los subtotales),
   "fecha_reporte": "YYYY-MM-DD" (si aparece en la imagen, sino usar null),
   "notas": "Cualquier observación relevante o null si no hay"
 }
 
 REGLAS:
-- Todos los números deben ser en formato decimal (ej: 45000.00, no "45.000")
-- Si no encuentras un dato, usa null
-- Responde ÚNICAMENTE con el JSON, sin texto adicional
-- Asegúrate de que la suma de subtotales coincida con el total_venta
+- Los montos DEBEN ser números enteros (ej: 45000, no 45.000 o 45000.00).
+- Si no encuentras un dato, usa null.
+- Responde ÚNICAMENTE con el JSON, sin texto adicional.
+- Asegúrate de que la suma de subtotales coincida EXACTAMENTE con el total_venta.
 `
 
 // =============================================
