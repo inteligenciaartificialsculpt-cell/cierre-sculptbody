@@ -163,7 +163,7 @@ const ExportManager = () => {
                     <div className="card-stat">
                         <div className="stat-label">Total Ventas</div>
                         <div className="stat-number text-green-400 text-3xl">
-                            ${Math.round(reportes.reduce((sum, r) => sum + r.total_venta_bruta, 0)).toLocaleString('es-CL')}
+                            ${reportes.reduce((sum, r) => sum + Math.round(r.total_venta_bruta || 0), 0).toLocaleString('es-CL')}
                         </div>
                     </div>
                 </div>

@@ -64,9 +64,9 @@ const Dashboard = () => {
 
     const calcularEstadisticas = (reportesData) => {
         // Estadísticas generales
-        const totalVentas = Math.round(reportesData.reduce((sum, r) => sum + r.total_venta_bruta, 0))
-        const totalPagosNetos = Math.round(reportesData.reduce((sum, r) => sum + r.pago_neto, 0))
-        const totalComisiones = Math.round(totalVentas - totalPagosNetos)
+        const totalVentas = reportesData.reduce((sum, r) => sum + Math.round(r.total_venta_bruta || 0), 0)
+        const totalPagosNetos = reportesData.reduce((sum, r) => sum + Math.round(r.pago_neto || 0), 0)
+        const totalComisiones = totalVentas - totalPagosNetos
         const totalProfesionales = reportesData.length
 
         // Ventas por sucursal
@@ -76,7 +76,7 @@ const Dashboard = () => {
             if (!ventasPorSucursal[sucursal]) {
                 ventasPorSucursal[sucursal] = 0
             }
-            ventasPorSucursal[sucursal] += Math.round(reporte.total_venta_bruta)
+            ventasPorSucursal[sucursal] += Math.round(reporte.total_venta_bruta || 0)
         })
 
         // Top servicios
