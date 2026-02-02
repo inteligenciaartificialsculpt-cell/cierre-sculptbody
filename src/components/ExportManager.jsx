@@ -243,7 +243,7 @@ const ExportManager = () => {
                                             {reporte.profesional?.sucursal?.nombre || 'N/A'}
                                         </td>
                                         <td className="text-green-400 font-bold">
-                                            ${reporte.total_venta_bruta?.toLocaleString('es-CL')}
+                                            ${Math.round(reporte.total_venta_bruta || 0).toLocaleString('es-CL')}
                                         </td>
                                         <td className="text-accent-red font-bold">
                                             {reporte.comision_porcentaje}%

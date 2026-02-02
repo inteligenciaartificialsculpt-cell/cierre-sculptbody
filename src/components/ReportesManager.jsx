@@ -141,7 +141,7 @@ const ReportesManager = ({ refreshTrigger }) => {
                                             {reporte.profesional?.sucursal?.nombre || 'N/A'}
                                         </td>
                                         <td className="text-green-400 font-bold">
-                                            ${reporte.total_venta_bruta?.toLocaleString('es-CL') || 0}
+                                            ${Math.round(reporte.total_venta_bruta || 0).toLocaleString('es-CL')}
                                         </td>
                                         <td className="text-accent-red font-bold">
                                             {reporte.comision_porcentaje}%
@@ -247,7 +247,7 @@ const ReportesManager = ({ refreshTrigger }) => {
                             <div className="card bg-green-900/20 border-green-700">
                                 <div className="stat-label">Total Ventas</div>
                                 <div className="stat-number text-green-400 text-3xl">
-                                    ${reporteSeleccionado.total_venta_bruta?.toLocaleString('es-CL')}
+                                    ${Math.round(reporteSeleccionado.total_venta_bruta || 0).toLocaleString('es-CL')}
                                 </div>
                             </div>
                             <div className="card bg-red-900/20 border-red-700">
@@ -279,10 +279,10 @@ const ReportesManager = ({ refreshTrigger }) => {
                                                 <td className="font-bold text-white">{servicio.nombre_servicio}</td>
                                                 <td className="text-blue-400">{servicio.cantidad}</td>
                                                 <td className="text-green-400">
-                                                    ${servicio.precio_unitario?.toLocaleString('es-CL')}
+                                                    ${Math.round(servicio.precio_unitario || 0).toLocaleString('es-CL')}
                                                 </td>
                                                 <td className="text-yellow-400 font-bold">
-                                                    ${servicio.subtotal?.toLocaleString('es-CL')}
+                                                    ${Math.round(servicio.subtotal || 0).toLocaleString('es-CL')}
                                                 </td>
                                             </tr>
                                         ))}

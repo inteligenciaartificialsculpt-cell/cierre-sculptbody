@@ -445,7 +445,7 @@ const BulkUpload = ({ onSuccess }) => {
                                             <div className="font-bold text-white">{result.fileName}</div>
                                             {result.success ? (
                                                 <div className="text-sm text-green-400">
-                                                    {result.profesional} - ${result.total?.toLocaleString('es-CL')}
+                                                    {result.profesional} - ${Math.round(result.total || 0).toLocaleString('es-CL')}
                                                 </div>
                                             ) : (
                                                 <div className="text-sm text-red-400">{result.error}</div>
