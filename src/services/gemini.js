@@ -15,8 +15,8 @@ let model
 
 try {
     genAI = new GoogleGenerativeAI(API_KEY)
-    // Usamos gemini-1.5-flash que es el modelo más estable y balanceado para visión
-    model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+    // Forzamos el uso de la versión 'v1' de la API y el modelo gemini-1.5-flash para evitar el error 404
+    model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' }, { apiVersion: 'v1' })
 } catch (error) {
     console.error('Error al inicializar Gemini AI:', error)
 }
