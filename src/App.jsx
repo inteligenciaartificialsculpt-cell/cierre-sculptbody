@@ -74,6 +74,7 @@ function App() {
                         <div className="text-xs text-gray-500">
                             <div>© 2026 - Fintech Specialist</div>
                             <div className="text-accent-red font-bold mt-1">High-End Dark Mode</div>
+                            <div className="text-xs mt-1 text-slate-600 font-mono">VERSIÓN: 2.1 - PRO ACTIVE</div>
                         </div>
                     </div>
                 </div>
