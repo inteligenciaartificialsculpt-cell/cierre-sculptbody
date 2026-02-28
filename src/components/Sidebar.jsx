@@ -85,7 +85,7 @@ const Sidebar = ({ activeView, setActiveView }) => {
                 <div className="text-xs text-gray-500 space-y-1">
                     <div className="flex items-center justify-between">
                         <span>Versión</span>
-                        <span className="font-bold text-white">1.0.0</span>
+                        <span className="font-bold text-white">2.2 - 2026 ENGINE</span>
                     </div>
                     <div className="flex items-center justify-between">
                         <span>Fecha</span>

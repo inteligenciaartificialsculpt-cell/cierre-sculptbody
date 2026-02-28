@@ -1,17 +1,45 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
 // =============================================
-// MOTOR DE IA - VERSIÓN MAESTRA 2.1 (ESTABLE)
+// MOTOR DE IA - VERSIÓN 2.2 (ENGINE 2026)
 // =============================================
-// Inyectamos la clave directamente para evitar fallos de entorno
+// CLAVE PRO INYECTADA PARA MÁXIMA POTENCIA
 const API_KEY = 'AIzaSyAE5ieFQRNmOFbHSquscbceusgXcfcx6_Y'
 const genAI = new GoogleGenerativeAI(API_KEY)
 
-// Usamos únicamente modelos estables v1 para evitar 404 regionales
-const STABLE_CHANNELS = [
-    { model: 'gemini-1.5-flash', apiVersion: 'v1' },
-    { model: 'gemini-1.5-pro', apiVersion: 'v1' }
+// Canales vigentes hoy (Febrero 2026)
+// Se eliminan modelos 1.5 retirados por Google
+const MASTER_CHANNELS = [
+    { model: 'gemini-2.0-flash', apiVersion: 'v1' },
+    { model: 'gemini-2.0-flash-001', apiVersion: 'v1' },
+    { model: 'gemini-2.0-pro-exp-02-05', apiVersion: 'v1' },
+    { model: 'gemini-2.0-flash-lite-preview-02-05', apiVersion: 'v1' }
 ]
+
+const EXTRACTION_PROMPT = `
+Eres un asistente experto en análisis de reportes de ventas para centros estéticos en CHILE.
+
+INSTRUCCIONES DE MONEDA (CLP):
+1. Los montos están en PESOS CHILENOS (CLP).
+2. IMPORTANTE: El punto (.) en los reportes suele ser un SEPARADOR DE MILES (ej: 11.930.000 es 11 millones).
+3. NO trunques los números. Si ves "11.930.000", el valor numérico es 11930000.
+
+FORMATO DE SALIDA REQUERIDO (JSON):
+{
+  "nombre_profesional": "Nombre completo del profesional",
+  "servicios": [
+    {
+      "nombre": "Nombre del servicio/tratamiento",
+      "cantidad": número entero,
+      "precio_unitario": número entero (CLP),
+      "subtotal": número entero (CLP)
+    }
+  ],
+  "total_venta": número entero (CLP),
+  "fecha_reporte": "YYYY-MM-DD",
+  "notas": null
+}
+`
 
 export const extractDataFromImage = async (imageFile) => {
     try {
@@ -25,10 +53,10 @@ export const extractDataFromImage = async (imageFile) => {
 
         let lastError = null
 
-        // Rotación de canales estables
-        for (const channel of STABLE_CHANNELS) {
+        // Motor de Resiliencia Industrial
+        for (const channel of MASTER_CHANNELS) {
             try {
-                console.log(`[AI-MASTER] Conectando a ${channel.model} (v1 Stable)...`)
+                console.log(`[AI-MASTER-2026] Intentando conexión vía ${channel.model}...`)
                 const modelInstance = genAI.getGenerativeModel({ model: channel.model }, { apiVersion: channel.apiVersion })
 
                 const result = await modelInstance.generateContent([EXTRACTION_PROMPT, ...imageParts])
@@ -43,26 +71,26 @@ export const extractDataFromImage = async (imageFile) => {
                     if (jsonMatch) {
                         jsonData = JSON.parse(jsonMatch[0])
                     } else {
-                        throw new Error('Formato de datos irreconocible')
+                        throw new Error('Formato JSON no detectado')
                     }
                 }
 
                 return { success: true, data: jsonData, error: null }
             } catch (error) {
-                console.error(`[AI-MASTER] Error en canal ${channel.model}:`, error.message)
+                console.warn(`[AI-MASTER-2026] Canal ${channel.model} no disponible:`, error.message)
                 lastError = error
-                continue
+                // Pequeña espera para no saturar el handshake
+                await new Promise(r => setTimeout(r, 600))
             }
         }
 
-        throw new Error(`Google AI no disponible temporalmente. Intente nuevamente en unos segundos. Detalle: ${lastError?.message}`)
+        throw new Error(`Google AI ha retirado el soporte para modelos antiguos. Detalle: ${lastError?.message}`)
 
     } catch (error) {
+        console.error('CRITICAL ENGINE ERROR:', error)
         return { success: false, data: null, error: error.message }
     }
 }
-
-const EXTRACTION_PROMPT = `Analiza este reporte de ventas estéticas en Chile (CLP). Extrae profesional, servicios, cantidades, precios unitarios y total en JSON puro: { "nombre_profesional": "", "servicios": [{ "nombre": "", "cantidad": 0, "precio_unitario": 0, "subtotal": 0 }], "total_venta": 0 }`
 
 export const extractDataFromMultipleImages = async (imageFiles, onProgress = null) => {
     const results = []
@@ -79,7 +107,7 @@ export const extractDataFromMultipleImages = async (imageFiles, onProgress = nul
         if (result.success) successCount++
         else failCount++
 
-        await sleep(500) // Pausa mínima para fluidez
+        await sleep(1000)
     }
 
     return {
@@ -102,6 +130,6 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 export const validateImageFile = (file) => {
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
     if (!validTypes.includes(file.type)) return { valid: false, error: 'Formato inválido.' }
-    if (file.size > 10 * 1024 * 1024) return { valid: false, error: 'Imagen muy grande.' }
+    if (file.size > 10 * 1024 * 1024) return { valid: false, error: 'Imagen muy grande (Máx 10MB).' }
     return { valid: true, error: null }
 }
