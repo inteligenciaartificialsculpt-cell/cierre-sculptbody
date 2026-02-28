@@ -10,20 +10,21 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY
 
-let genAI
-let model
-
-try {
-    if (!API_KEY) {
-        throw new Error('VITE_GEMINI_API_KEY no encontrada. Configúrala en Netlify o .env')
+// Motor de IA con Auto-Recuperación (Nivel Senior)
+const initializeModel = (key) => {
+    try {
+        const genAI = new GoogleGenerativeAI(key)
+        // No forzamos versión; dejamos que el SDK negocie la mejor ruta estable
+        return genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+    } catch (e) {
+        console.error('Error inicial: ', e)
+        return null
     }
-    genAI = new GoogleGenerativeAI(API_KEY)
-    // Usamos el identificador estándar. La librería detectará la API version correcta.
-    // Usamos gemini-1.5-flash: es el modelo más robusto para OCR y no tiene errores de compatibilidad
-    model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
-} catch (error) {
-    console.error('Error al inicializar Gemini AI:', error)
 }
+
+let genAI_instance = API_KEY ? new GoogleGenerativeAI(API_KEY) : null
+let model = genAI_instance ? genAI_instance.getGenerativeModel({ model: 'gemini-1.5-flash' }) : null
+
 
 // =============================================
 // PROMPT DE EXTRACCIÓN DE DATOS
@@ -89,8 +90,16 @@ export const extractDataFromImage = async (imageFile) => {
             }
         ]
 
-        // Llamar a la API de Gemini
-        const result = await model.generateContent([EXTRACTION_PROMPT, ...imageParts])
+        // Reintento Inteligente: Si el modelo predeterminado falla con 404, prueba con una alternativa
+        let result;
+        try {
+            result = await model.generateContent([EXTRACTION_PROMPT, ...imageParts]);
+        } catch (initialError) {
+            console.warn('Modelo principal falló, intentando con alternativa Pro...', initialError);
+            const fallbackModel = genAI_instance.getGenerativeModel({ model: 'gemini-1.5-pro' });
+            result = await fallbackModel.generateContent([EXTRACTION_PROMPT, ...imageParts]);
+        }
+
         const response = await result.response
         const text = response.text()
 
