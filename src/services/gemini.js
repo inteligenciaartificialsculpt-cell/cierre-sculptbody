@@ -15,8 +15,8 @@ let model
 
 try {
     genAI = new GoogleGenerativeAI(API_KEY)
-    // Usamos gemini-2.5-flash-lite que ofrece la mayor cuota gratuita (1000 reportes/día) en 2026
-    model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' })
+    // Usamos gemini-1.5-flash que es el estándar para procesamiento de imágenes con buena cuota gratuita.
+    model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
 } catch (error) {
     console.error('Error al inicializar Gemini AI:', error)
 }

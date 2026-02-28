@@ -1,15 +1,21 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Sidebar from './components/Sidebar'
 import Dashboard from './components/Dashboard'
 import BulkUpload from './components/BulkUpload'
 import ReportesManager from './components/ReportesManager'
 import ExportManager from './components/ExportManager'
 import SyncData from './components/SyncData'
+import { keepAliveService } from './services/keepAlive'
 import './index.css'
 
 function App() {
     const [activeView, setActiveView] = useState('dashboard')
     const [refreshTrigger, setRefreshTrigger] = useState(0)
+
+    // Anti-hibernación automática
+    useEffect(() => {
+        keepAliveService.ping()
+    }, [])
 
     // Manejador de éxito de upload para refrescar otras vistas
     const handleUploadSuccess = () => {
