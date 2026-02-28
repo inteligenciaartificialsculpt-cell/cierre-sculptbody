@@ -8,15 +8,18 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 // 2. Crear archivo .env en la raíz con: VITE_GEMINI_API_KEY=tu_api_key
 // 3. Reiniciar el servidor de desarrollo
 
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'YOUR_GEMINI_API_KEY'
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY
 
 let genAI
 let model
 
 try {
+    if (!API_KEY) {
+        throw new Error('VITE_GEMINI_API_KEY no está definida en las variables de entorno.')
+    }
     genAI = new GoogleGenerativeAI(API_KEY)
-    // Forzamos el uso de la versión 'v1' de la API y el modelo gemini-1.5-flash para evitar el error 404
-    model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' }, { apiVersion: 'v1' })
+    // Restauramos a gemini-1.5-flash en v1beta, la configuración que funcionaba el mes pasado
+    model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' }, { apiVersion: 'v1beta' })
 } catch (error) {
     console.error('Error al inicializar Gemini AI:', error)
 }
