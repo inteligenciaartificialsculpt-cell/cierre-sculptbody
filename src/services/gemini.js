@@ -19,8 +19,8 @@ try {
     }
     genAI = new GoogleGenerativeAI(API_KEY)
     // Usamos el identificador estándar. La librería detectará la API version correcta.
-    // Usamos gemini-1.5-pro que es el modelo más potente incluido en tu suscripción de pago
-    model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' })
+    // Usamos gemini-1.5-flash: es el modelo más robusto para OCR y no tiene errores de compatibilidad
+    model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
 } catch (error) {
     console.error('Error al inicializar Gemini AI:', error)
 }
