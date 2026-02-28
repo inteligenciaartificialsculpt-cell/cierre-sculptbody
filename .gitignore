@@ -47,3 +47,6 @@ coverage
 .parcel-cache
 .firebase
 .vercel
+
+# Local Netlify folder
+.netlify

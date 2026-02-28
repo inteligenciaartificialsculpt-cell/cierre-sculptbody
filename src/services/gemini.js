@@ -15,11 +15,11 @@ let model
 
 try {
     if (!API_KEY) {
-        throw new Error('VITE_GEMINI_API_KEY no está definida en las variables de entorno.')
+        throw new Error('VITE_GEMINI_API_KEY no encontrada. Configúrala en Netlify o .env')
     }
     genAI = new GoogleGenerativeAI(API_KEY)
-    // Restauramos a gemini-1.5-flash en v1beta, la configuración que funcionaba el mes pasado
-    model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' }, { apiVersion: 'v1beta' })
+    // Usamos el identificador estándar. La librería detectará la API version correcta.
+    model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
 } catch (error) {
     console.error('Error al inicializar Gemini AI:', error)
 }
