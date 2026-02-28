@@ -1,30 +1,19 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
 // =============================================
-// GEMINI AI CONFIGURATION
+// MOTOR DE IA DE ALTA DISPONIBILIDAD (FAILOVER)
 // =============================================
-// INSTRUCCIONES:
-// 1. Obtener API Key en https://makersuite.google.com/app/apikey
-// 2. Crear archivo .env en la raíz con: VITE_GEMINI_API_KEY=tu_api_key
-// 3. Reiniciar el servidor de desarrollo
+// LLAVE PRO PARA CUENTA DE PAGO
+const API_KEY = 'AIzaSyAE5ieFQRNmOFbHSquscbceusgXcfcx6_Y'
+const genAI = new GoogleGenerativeAI(API_KEY)
 
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY
-
-// Motor de IA con Auto-Recuperación (Nivel Senior)
-const initializeModel = (key) => {
-    try {
-        const genAI = new GoogleGenerativeAI(key)
-        // No forzamos versión; dejamos que el SDK negocie la mejor ruta estable
-        return genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
-    } catch (e) {
-        console.error('Error inicial: ', e)
-        return null
-    }
-}
-
-let genAI_instance = API_KEY ? new GoogleGenerativeAI(API_KEY) : null
-let model = genAI_instance ? genAI_instance.getGenerativeModel({ model: 'gemini-1.5-flash' }) : null
-
+// Canales de respaldo: Combinaciones de modelos y versiones de API
+const CHANNELS = [
+    { model: 'gemini-1.5-flash', apiVersion: 'v1' },
+    { model: 'gemini-1.5-flash', apiVersion: 'v1beta' },
+    { model: 'gemini-1.5-pro', apiVersion: 'v1' },
+    { model: 'gemini-1.5-pro', apiVersion: 'v1beta' }
+]
 
 // =============================================
 // PROMPT DE EXTRACCIÓN DE DATOS
@@ -73,64 +62,62 @@ REGLAS:
 // =============================================
 export const extractDataFromImage = async (imageFile) => {
     try {
-        if (!model) {
-            throw new Error('Gemini AI no está inicializado. Verifica tu API Key.')
-        }
-
-        // Convertir imagen a base64
         const imageBase64 = await fileToBase64(imageFile)
-
-        // Crear el prompt con la imagen
         const imageParts = [
             {
                 inlineData: {
-                    data: imageBase64.split(',')[1], // Remover el prefijo data:image/...
+                    data: imageBase64.split(',')[1],
                     mimeType: imageFile.type
                 }
             }
         ]
 
-        // Reintento Inteligente: Si el modelo predeterminado falla con 404, prueba con una alternativa
-        let result;
-        try {
-            result = await model.generateContent([EXTRACTION_PROMPT, ...imageParts]);
-        } catch (initialError) {
-            console.warn('Modelo principal falló, intentando con alternativa Pro...', initialError);
-            const fallbackModel = genAI_instance.getGenerativeModel({ model: 'gemini-1.5-pro' });
-            result = await fallbackModel.generateContent([EXTRACTION_PROMPT, ...imageParts]);
-        }
+        let lastError = null
 
-        const response = await result.response
-        const text = response.text()
+        // Bucle de Resiliencia: Intenta cada canal hasta que uno funcione
+        for (const channel of CHANNELS) {
+            try {
+                console.log(`[AI-MASTER] Intentando canal: ${channel.model} (${channel.apiVersion})...`)
+                const modelInstance = genAI.getGenerativeModel({ model: channel.model }, { apiVersion: channel.apiVersion })
 
-        // Extraer JSON de la respuesta
-        let jsonData
-        try {
-            // Intentar parsear directamente
-            jsonData = JSON.parse(text)
-        } catch (e) {
-            // Si falla, buscar JSON en el texto (por si viene con markdown)
-            const jsonMatch = text.match(/\{[\s\S]*\}/)
-            if (jsonMatch) {
-                jsonData = JSON.parse(jsonMatch[0])
-            } else {
-                throw new Error('No se pudo extraer JSON de la respuesta de Gemini')
+                const result = await modelInstance.generateContent([EXTRACTION_PROMPT, ...imageParts])
+                const response = await result.response
+                const text = response.text()
+
+                // Intentar parsear el JSON
+                let jsonData
+                try {
+                    jsonData = JSON.parse(text)
+                } catch (e) {
+                    const jsonMatch = text.match(/\{[\s\S]*\}/)
+                    if (jsonMatch) {
+                        jsonData = JSON.parse(jsonMatch[0])
+                    } else {
+                        throw new Error('No se detectó JSON válido')
+                    }
+                }
+
+                // Validar estructura mínima
+                if (!jsonData.nombre_profesional || !jsonData.servicios) {
+                    throw new Error('Estructura incompleta')
+                }
+
+                return {
+                    success: true,
+                    data: jsonData,
+                    error: null
+                }
+            } catch (error) {
+                console.warn(`[AI-MASTER] Falló ${channel.model} en ${channel.apiVersion}:`, error.message)
+                lastError = error
+                // Pasar al siguiente canal
             }
         }
 
-        // Validar estructura del JSON
-        if (!jsonData.nombre_profesional || !jsonData.servicios || !jsonData.total_venta) {
-            throw new Error('Estructura de JSON inválida. Faltan campos obligatorios.')
-        }
-
-        return {
-            success: true,
-            data: jsonData,
-            error: null
-        }
+        throw new Error(`Servicio no disponible. Reintentos agotados. Detalle: ${lastError?.message}`)
 
     } catch (error) {
-        console.error('Error en extracción de datos:', error)
+        console.error('Error final extraction:', error)
         return {
             success: false,
             data: null,
@@ -150,7 +137,6 @@ export const extractDataFromMultipleImages = async (imageFiles, onProgress = nul
     for (let i = 0; i < imageFiles.length; i++) {
         const file = imageFiles[i]
 
-        // Notificar progreso
         if (onProgress) {
             onProgress({
                 current: i + 1,
@@ -159,7 +145,6 @@ export const extractDataFromMultipleImages = async (imageFiles, onProgress = nul
             })
         }
 
-        // Procesar imagen
         const result = await extractDataFromImage(file)
 
         results.push({
@@ -174,7 +159,7 @@ export const extractDataFromMultipleImages = async (imageFiles, onProgress = nul
             failCount++
         }
 
-        // Reducimos la pausa a 1 segundo gracias a la cuota de la cuenta de pago
+        // 1 segundo de pausa para orden (con tu clave pro no hay límites de velocidad)
         await sleep(1000)
     }
 
@@ -192,7 +177,6 @@ export const extractDataFromMultipleImages = async (imageFiles, onProgress = nul
 // UTILIDADES
 // =============================================
 
-// Convertir archivo a base64
 const fileToBase64 = (file) => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader()
@@ -202,10 +186,8 @@ const fileToBase64 = (file) => {
     })
 }
 
-// Sleep helper
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
-// Validar que la imagen sea procesable
 export const validateImageFile = (file) => {
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
     const maxSize = 10 * 1024 * 1024 // 10MB
