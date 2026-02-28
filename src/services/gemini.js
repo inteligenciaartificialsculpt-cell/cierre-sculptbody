@@ -19,7 +19,8 @@ try {
     }
     genAI = new GoogleGenerativeAI(API_KEY)
     // Usamos el identificador estándar. La librería detectará la API version correcta.
-    model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+    // Usamos gemini-1.5-pro que es el modelo más potente incluido en tu suscripción de pago
+    model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' })
 } catch (error) {
     console.error('Error al inicializar Gemini AI:', error)
 }
@@ -164,8 +165,8 @@ export const extractDataFromMultipleImages = async (imageFiles, onProgress = nul
             failCount++
         }
 
-        // Aumentamos pausa a 12 segundos para cumplir con el límite de 5 peticiones por minuto de la versión gratuita
-        await sleep(12000)
+        // Reducimos la pausa a 1 segundo gracias a la cuota de la cuenta de pago
+        await sleep(1000)
     }
 
     return {
